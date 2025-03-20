@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { questions } from '@/data/questions';
-import '../../styles/global.css';
+import '../../globals.css';
 
 export default function QuestionPage({ params }) {
   const router = useRouter();
