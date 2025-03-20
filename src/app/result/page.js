@@ -1,7 +1,7 @@
 'use client';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { questions } from '@/data/questions';
-import '../global.css';
+import "../global.css";
 
 export default function ResultPage() {
   const searchParams = useSearchParams();
