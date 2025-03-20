@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import '../../app/global.css';
+import "../globals.css";
 
 export default function GamePage() {
   const router = useRouter();
@@ -11,9 +11,9 @@ export default function GamePage() {
 
   return (
     <div className="container">
-      <h1 className="title">Quiz App</h1>
+      <h1 className="title">Commencer l'examen</h1>
       <button className="button" onClick={startQuiz}>
-        Commencer le Quiz
+        Commencer l'examene
       </button>
     </div>
   );
