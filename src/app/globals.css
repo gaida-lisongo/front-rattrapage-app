@@ -3,6 +3,9 @@
   --primary-hover: #0052cc;
   --background: #f0f5ff;
   --text-color: #1a1a1a;
+  --primary-blue: #0066ff;
+  --dark-blue: #004dc2;
+  --light-blue: #f0f5ff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,8 +24,8 @@ body {
 body {
   margin: 0;
   padding: 0;
-  background: var(--background);
-  background: linear-gradient(135deg, #f0f5ff 0%, #e6f0ff 100%);
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
   font-family: var(--font-geist-sans);
   color: var(--text-color);
   -webkit-font-smoothing: antialiased;
@@ -175,4 +178,51 @@ a {
   color: var(--primary-color);
   margin-bottom: 2rem;
   animation: fadeIn 1s ease-out;
+}
+
+/* Auth styles */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.auth-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #e1e1e1;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input:focus {
+  border-color: var(--primary-blue);
+  outline: none;
+}
+
+.error-message {
+  color: #ff3333;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
 }

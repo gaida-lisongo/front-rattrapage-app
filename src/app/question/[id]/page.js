@@ -10,13 +10,19 @@ export default function QuestionPage({ params }) {
   const [score, setScore] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   
-  // Utiliser React.use pour accéder aux params
   const questionId = parseInt(use(params).id);
   
   useEffect(() => {
+    // Vérifier le token au chargement
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/');
+      return;
+    }
+
     const question = questions.find(q => q.id === questionId);
     setCurrentQuestion(question);
-  }, [questionId]);
+  }, [questionId, router]);
 
   const handleAnswer = (selectedAnswer) => {
     if (selectedAnswer === currentQuestion.correctAnswer) {
