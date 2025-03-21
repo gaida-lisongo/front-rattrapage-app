@@ -1,7 +1,8 @@
 'use client';
-import { useState, useEffect, useMemo, use } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import request from '@/api/epreuve';
 import Modal from '@/components/Modal';
 import Loader from '@/components/Loader';
@@ -9,108 +10,80 @@ import Image from 'next/image';
 import { FaPlay } from 'react-icons/fa';
 
 export default function RattrapagePage({ params }) {
-  const [examData, setExamData] = useState(null);
   const router = useRouter();
-
-  useEffect(() => {
-    // Safe localStorage access after component mount
-    if (typeof window !== 'undefined') {
-      try {
-        const data = JSON.parse(localStorage.getItem('currentExam'));
-        if (!data) {
-          router.replace('/');
-          return;
-        }
-        setExamData(data);
-      } catch (error) {
-        console.error('Error accessing localStorage:', error);
-        router.replace('/');
-      }
-    }
-  }, [router]);
-
-  const handleStartExam = () => {
-    if (!examData) return;
-
-    try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('currentScore', '0');
-        localStorage.setItem('currentExam', JSON.stringify({
-          ...examData,
-          startTime: new Date().getTime()
-        }));
-        router.push('/question/1');
-      }
-    } catch (error) {
-      console.error('Error storing exam data:', error);
-    }
-  };
-
+  const [examData, setExamData] = useLocalStorage('currentExam', null);
+  const [epreuveId, setEpreuveId] = useLocalStorage('epreuveId', params.id);
   const [epreuve, setEpreuve] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  
-  // Get ID from params immediately
-  const idParam = use(params).id;
-  
-  // Store exam ID in localStorage before any other operations
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('epreuveId', idParam);
-    }
-  }, [idParam]);
 
-  // Now call useAuth after ID is stored
+  // Call useAuth after initialization
   useAuth();
 
-  // Use the stored ID directly from localStorage in your logic
-  const checkExamAttempt = useMemo(async () => {
-    const storedId = localStorage.getItem('epreuveId');
-    const userData = JSON.parse(localStorage.getItem('user'));
-    
-    if (!userData || !storedId) {
-      setShowModal(true);
-      return;
-    }
-
-    try {
-      const response = await request.getResults(userData.id);
-      const lastResults = response.data;
-
-      if (lastResults?.length > 0) {
-        const hasAttempted = lastResults.some(
-          result => result.id_rattrapage === parseInt(storedId)
-        );
-
-        if (hasAttempted) {
-          setShowModal(true);
-        }
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Fetch exam data using the stored ID
+  // Check if user has already attempted this exam
   useEffect(() => {
-    const storedId = localStorage.getItem('epreuveId');
-    if (!storedId) return;
+    const checkExamAttempt = async () => {
+      if (typeof window === 'undefined') return;
 
-    const fetchEpreuve = async () => {
       try {
-        const response = await request.getEpreuve(parseInt(storedId));
-        setEpreuve(response);
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData || !epreuveId) {
+          setShowModal(true);
+          return;
+        }
+
+        const response = await request.getResults(userData.id);
+        const lastResults = response.data;
+
+        if (lastResults?.length > 0) {
+          const hasAttempted = lastResults.some(
+            result => result.id_rattrapage === parseInt(epreuveId)
+          );
+
+          if (hasAttempted) {
+            setShowModal(true);
+          }
+        }
       } catch (error) {
-        console.error("Erreur lors du chargement de l'épreuve:", error);
+        console.error('Error:', error);
       } finally {
         setLoading(false);
       }
     };
 
+    checkExamAttempt();
+  }, [epreuveId]);
+
+  // Fetch exam data
+  useEffect(() => {
+    const fetchEpreuve = async () => {
+      if (!epreuveId) return;
+
+      try {
+        const response = await request.getEpreuve(parseInt(epreuveId));
+        setEpreuve(response);
+      } catch (error) {
+        console.error("Erreur lors du chargement de l'épreuve:", error);
+      }
+    };
+
     fetchEpreuve();
-  }, []);
+  }, [epreuveId]);
+
+  const handleStartExam = () => {
+    if (!epreuve) return;
+
+    try {
+      setExamData({
+        ...epreuve,
+        startTime: new Date().getTime()
+      });
+      localStorage.setItem('currentScore', '0');
+      router.push('/question/1');
+    } catch (error) {
+      console.error('Error storing exam data:', error);
+    }
+  };
 
   const handleModalClose = () => {
     setShowModal(false);
