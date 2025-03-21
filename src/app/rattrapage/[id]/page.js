@@ -1,8 +1,7 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
 import request from '@/api/epreuve';
 import Modal from '@/components/Modal';
 import Loader from '@/components/Loader';
@@ -11,14 +10,15 @@ import { FaPlay } from 'react-icons/fa';
 
 export default function RattrapagePage({ params }) {
   const router = useRouter();
-  const [examData, setExamData] = useLocalStorage('currentExam', null);
-  const [epreuveId, setEpreuveId] = useLocalStorage('epreuveId', params.id);
   const [epreuve, setEpreuve] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
   // Call useAuth after initialization
   useAuth();
+
+  // Get epreuveId from params
+  const epreuveId = use(params).id;
 
   // Check if user has already attempted this exam
   useEffect(() => {
@@ -74,11 +74,23 @@ export default function RattrapagePage({ params }) {
     if (!epreuve) return;
 
     try {
-      setExamData({
+      // Store exam data with all necessary properties
+      const examData = {
         ...epreuve,
-        startTime: new Date().getTime()
-      });
+        examId: epreuve.id,
+        startTime: new Date().getTime(),
+        duree: epreuve.duree,
+        questions: epreuve.questions.map((q, index) => ({
+          ...q,
+          order: index + 1
+        }))
+      };
+
+      // Store in localStorage
+      localStorage.setItem('currentExam', JSON.stringify(examData));
       localStorage.setItem('currentScore', '0');
+      localStorage.setItem('epreuveId', epreuveId);
+
       router.push('/question/1');
     } catch (error) {
       console.error('Error storing exam data:', error);

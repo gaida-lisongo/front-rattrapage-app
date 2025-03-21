@@ -1,30 +1,54 @@
 import { useState, useEffect } from 'react';
 
 export function useLocalStorage(key, initialValue) {
-  // State to store our value
   const [storedValue, setStoredValue] = useState(initialValue);
 
-  // Initialize the state
   useEffect(() => {
     try {
       const item = localStorage.getItem(key);
-      setStoredValue(item ? JSON.parse(item) : initialValue);
+      if (item) {
+        const parsedItem = JSON.parse(item);
+        // Préserver le startTime original pour le timing
+        if (key === 'currentExam' && parsedItem.questions) {
+          const startTime = parsedItem.startTime; // Sauvegarder le startTime
+          parsedItem.questions = parsedItem.questions.map((q, index) => ({
+            ...q,
+            order: index + 1
+          }));
+          parsedItem.startTime = startTime; // Restaurer le startTime
+        }
+        setStoredValue(parsedItem);
+      } else {
+        setStoredValue(initialValue);
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Error in useLocalStorage:', error);
       setStoredValue(initialValue);
     }
   }, [key, initialValue]);
 
-  // Return a wrapped version of useState's setter function
   const setValue = (value) => {
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      let valueToStore = value instanceof Function ? value(storedValue) : value;
+      
+      if (key === 'currentExam' && valueToStore?.questions) {
+        valueToStore = {
+          ...valueToStore,
+          startTime: valueToStore.startTime,
+          duree: valueToStore.duree,
+          questions: valueToStore.questions.map((q, index) => ({
+            ...q,
+            order: index + 1
+          }))
+        };
+      }
+
       setStoredValue(valueToStore);
       if (typeof window !== 'undefined') {
         localStorage.setItem(key, JSON.stringify(valueToStore));
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error setting localStorage:', error);
     }
   };
 

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, use, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import request from '@/api/epreuve';
@@ -13,58 +13,39 @@ export default function QuestionPage({ params }) {
   const [examData, setExamData] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
-  const [score, setScore] = useState(0);
-  const [loading, setLoading] = useState(true); // Start with loading true
-  const scoreRef = useRef(0);
+  const [score, setScore] = useState(0); // Initialize with 0
+  const [loading, setLoading] = useState(false);
+  const scoreRef = useRef(0); // Pour tracker le score actuel de manière fiable
 
-  const questionNumber = parseInt(params.id); // Remove use() hook
+  const questionNumber = parseInt(use(params).id);
 
-  // Initialize exam data and question
+  // Move localStorage operations into useEffect
   useEffect(() => {
-    const initializeExam = () => {
-      try {
-        const data = JSON.parse(localStorage.getItem('currentExam'));
-        if (!data) {
-          router.replace('/');
-          return;
-        }
-
-        setExamData(data);
-        const question = data.questions.find(q => q.order === questionNumber);
-        if (!question) {
-          router.replace('/');
-          return;
-        }
-
-        setCurrentQuestion(question);
-
-        // Set time left
-        const elapsed = Math.floor((new Date().getTime() - data.startTime) / 1000);
-        const remaining = data.totalTime - elapsed;
-        setTimeLeft(remaining);
-        
-        // Load saved score
-        const savedScore = localStorage.getItem('currentScore');
-        if (savedScore) {
-          const parsedScore = parseFloat(savedScore);
-          scoreRef.current = parsedScore;
-          setScore(parsedScore);
-        }
-
-        setLoading(false); // Set loading to false after initialization
-      } catch (error) {
-        console.error('Error initializing exam:', error);
-        router.replace('/');
-      }
-    };
-
-    initializeExam();
-  }, [questionNumber, router]);
-
-  // Timer effect
+    // Safe localStorage access after component mount
+    const savedScore = localStorage.getItem('currentScore');
+    if (savedScore) {
+      setScore(parseFloat(savedScore));
+    }
+  }, []);
+  
   useEffect(() => {
-    if (!timeLeft) return;
-
+    const data = JSON.parse(localStorage.getItem('currentExam'));
+    console.log('Exam data:', data);
+    if (!data || !data.startTime || !data.duree) {
+      router.replace('/');
+      return;
+    }
+    setExamData(data);
+    
+    const question = data.questions.find(q => q.order === questionNumber);
+    setCurrentQuestion(question);
+  
+    // Gestion du temps
+    const elapsed = Math.floor((new Date().getTime() - data.startTime) / 1000);
+    const totalTime = data.duree * 60; // Convertir les minutes en secondes
+    const remaining = totalTime - elapsed;
+    setTimeLeft(remaining);
+  
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -75,9 +56,9 @@ export default function QuestionPage({ params }) {
         return prev - 1;
       });
     }, 1000);
-
+  
     return () => clearInterval(timer);
-  }, [timeLeft]);
+  }, [questionNumber, router]);
 
   // Ajouter un gestionnaire de visibilité
   useEffect(() => {
@@ -94,7 +75,7 @@ export default function QuestionPage({ params }) {
         handlePenalty();
       }
     };
-
+    console.log('Current question:', currentQuestion);
     // Ajouter les écouteurs d'événements
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('blur', handleWindowBlur);
@@ -141,11 +122,16 @@ export default function QuestionPage({ params }) {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
-  const handleTimeUp = () => {
-    if (typeof window !== 'undefined') {
-      saveAndRedirect(true);
+  const handleTimeUp = useCallback(async () => {
+    try {
+      const data = JSON.parse(localStorage.getItem('currentExam'));
+      if (data) {
+        await saveAndRedirect(true);
+      }
+    } catch (error) {
+      console.error('Error in handleTimeUp:', error);
     }
-  };
+  }, []);
 
   const handleAnswer = async (choix, index) => {
     if (loading || !currentQuestion) return;
@@ -186,7 +172,7 @@ export default function QuestionPage({ params }) {
       const finalScore = scoreRef.current;
       
       await localStorage.setItem('examResults', JSON.stringify({
-        examId: examData?.examId,
+        examId: examData?.examenId,
         cours: examData?.cours,
         annee: examData?.annee,
         score: finalScore,
@@ -199,7 +185,7 @@ export default function QuestionPage({ params }) {
       localStorage.removeItem('currentScore');
       const payload = {
         studentId: userData.id, 
-        examId: examData.examId, 
+        examId: examData.examenId, 
         score: finalScore, 
         url: ''
       };
@@ -227,10 +213,7 @@ export default function QuestionPage({ params }) {
     }
   }, []);
 
-  // Update the render condition
-  if (loading || !currentQuestion || !examData) {
-    return <Loader />;
-  }
+  if (!currentQuestion || loading) return <Loader />;
 
   return (
     <div className="question-page">
