@@ -173,11 +173,23 @@ export default function QuestionPage({ params }) {
         timeUp
       }));
 
+      const userData = JSON.parse(localStorage.getItem('user'));
       // Nettoyer le score en cours
       localStorage.removeItem('currentScore');
-      
+      const payload = {
+        studentId: userData.id, 
+        examId: examData.examId, 
+        score: finalScore, 
+        url: ''
+      };
+
+      request.setResult(payload)
+        .then(async (resp) => {
+          console.log('Résultat sauvegardé:', resp)
+          await router.replace('/result');
+        })
+        .catch(err => console.error('Erreur lors de la sauvegarde du résultat:', err));
       // Attendre que tout soit sauvegardé avant la redirection
-      await router.replace('/result');
     } catch (error) {
       console.error('Error saving results:', error);
       router.replace('/result');

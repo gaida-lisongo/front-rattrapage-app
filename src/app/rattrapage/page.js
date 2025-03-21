@@ -46,13 +46,13 @@ export default function GamePage() {
           <h1 className="welcome-title">Bienvenue sur la plateforme de la section HE</h1>
           <p className="welcome-text">
             Vous êtes sur le point de commencer votre examen de rattrapage.
-            Assurez-vous d'être dans un environnement calme et approprié.
+            Assurez-vous d&apos;être dans un environnement calme et approprié.
           </p>
         </div>
 
         <button className="start-button" onClick={startQuiz}>
           <FaPlay className="button-icon" />
-          Commencer l'examen
+          Commencer l&apos;examen
         </button>
       </div>
 

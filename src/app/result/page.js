@@ -42,17 +42,6 @@ export default function ResultPage() {
   };
 
   const handleBack = () => {
-
-    const payload = {
-      studentId: user.id, 
-      examId: results.examId, 
-      score: results.score, 
-      url: ''
-    };
-    request.setResult(payload)
-      .then(resp => console.log('Result saved:', resp))
-      .catch(err => console.error('Error saving result:', err));
-
     router.replace('/rattrapage');
 
   };
@@ -66,10 +55,12 @@ export default function ResultPage() {
       <div className="invoice-container">
         <div className="invoice-header">
           <div className="student-avatar">
-            <img
+            <Image
               src={user.avatar}
               alt={user.nom}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              width={100}
+              height={100}
+              layout="responsive"
             />
           </div>
           <div className="student-details">

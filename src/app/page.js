@@ -42,7 +42,7 @@ export default function Home() {
         </div>
         
         <h1 className="auth-title">Section HE</h1>
-        <p className="auth-subtitle">Plateforme d'examens en ligne</p>
+        <p className="auth-subtitle">Plateforme d&apos;examens en ligne</p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">

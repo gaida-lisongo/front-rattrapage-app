@@ -127,7 +127,7 @@ export default function RattrapagePage({ params }) {
 
           <div className="exam-header">
             <h1 className="exam-title">{epreuve.cours}</h1>
-            <p className="exam-subtitle">Résumé de l'épreuve</p>
+            <p className="exam-subtitle">Résumé de l&apos;épreuve</p>
           </div>
           
           <div className="info-grid">
@@ -152,16 +152,16 @@ export default function RattrapagePage({ params }) {
           <div className="exam-instructions">
             <h2 className="instructions-title">Instructions</h2>
             <ul className="instructions-list">
-              <li>Assurez-vous d'avoir une connexion internet stable</li>
-              <li>Ne quittez pas la fenêtre pendant l'examen</li>
-              <li>Le temps commence dès que vous cliquez sur "Commencer"</li>
+              <li>Assurez-vous d&apos;avoir une connexion internet stable</li>
+              <li>Ne quittez pas la fenêtre pendant l&apos;examen</li>
+              <li>Le temps commence dès que vous cliquez sur &quot;Commencer&quot;</li>
               <li>Répondez à toutes les questions dans le temps imparti</li>
             </ul>
           </div>
 
           <button className="start-button" onClick={handleStartExam}>
             <FaPlay className="button-icon" />
-            Commencer l'examen
+            Commencer l&apos;examen
           </button>
         </div>
       )}
