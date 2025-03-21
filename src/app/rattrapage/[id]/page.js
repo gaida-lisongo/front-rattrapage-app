@@ -9,7 +9,43 @@ import Image from 'next/image';
 import { FaPlay } from 'react-icons/fa';
 
 export default function RattrapagePage({ params }) {
+  const [examData, setExamData] = useState(null);
   const router = useRouter();
+
+  useEffect(() => {
+    // Safe localStorage access after component mount
+    if (typeof window !== 'undefined') {
+      try {
+        const data = JSON.parse(localStorage.getItem('currentExam'));
+        if (!data) {
+          router.replace('/');
+          return;
+        }
+        setExamData(data);
+      } catch (error) {
+        console.error('Error accessing localStorage:', error);
+        router.replace('/');
+      }
+    }
+  }, [router]);
+
+  const handleStartExam = () => {
+    if (!examData) return;
+
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('currentScore', '0');
+        localStorage.setItem('currentExam', JSON.stringify({
+          ...examData,
+          startTime: new Date().getTime()
+        }));
+        router.push('/question/1');
+      }
+    } catch (error) {
+      console.error('Error storing exam data:', error);
+    }
+  };
+
   const [epreuve, setEpreuve] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -79,28 +115,6 @@ export default function RattrapagePage({ params }) {
   const handleModalClose = () => {
     setShowModal(false);
     router.replace('/');
-  };
-
-  const handleStartExam = () => {
-    if (epreuve) {
-      // Mélanger les questions
-      const shuffledQuestions = [...epreuve.questions]
-        .sort(() => Math.random() - 0.5)
-        .map((q, index) => ({ ...q, order: index + 1 }));
-      
-      // Stocker les informations nécessaires dans localStorage
-      localStorage.setItem('currentExam', JSON.stringify({
-        examId: epreuve.examenId,
-        questions: shuffledQuestions,
-        totalTime: epreuve.duree * 60, // Conversion en secondes
-        startTime: new Date().getTime(),
-        cours: epreuve.cours,
-        annee: epreuve.annee
-      }));
-
-      // Rediriger vers la première question
-      router.push('/question/1');
-    }
   };
 
   if (loading) return <Loader />;
