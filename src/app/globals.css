@@ -913,7 +913,8 @@ a {
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.1);
+  background: #ffffff !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   border-radius: 16px;
   padding: 2rem;
@@ -921,6 +922,50 @@ a {
   max-width: 400px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.auth-card .auth-form {
+  width: 100%;
+}
+
+.auth-card .form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #000000 !important;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+}
+
+.auth-card .form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  color: #000000 !important;
+  font-size: 1rem;
+}
+
+.auth-card .form-group input::placeholder {
+  color: #666666;
+}
+
+.auth-card .input-icon {
+  color: #000000;
+}
+
+.auth-card .auth-title {
+  color: #000000 !important;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.auth-card .auth-subtitle {
+  color: #333333 !important;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
 }
 
 .logo-container {
@@ -965,6 +1010,26 @@ a {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.9); /* Lighter background for input */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  color: #000000; /* Pure black for input text */
+  font-size: 1rem;
+}
+/* Auth Form Styles */
+.auth-form .form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #333333; /* Dark gray, almost black */
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .form-group {
